@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Messages</title>
+    <link rel="stylesheet" href="../css/admin.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <nav class="dashboard-nav">
+            <h2>Admin Dashboard</h2>
+            <ul>
+                <li><a href="dashboard.html">Projects</a></li>
+                <li><a href="messages.html" class="active">Messages</a></li>
+                <li><a href="settings.html">Settings</a></li>
+                <li><a href="../index.html">Back to Site</a></li>
+            </ul>
+        </nav>
+
+        <main class="dashboard-content">
+            <div class="stats-cards">
+                <div class="stat-card">
+                    <h3>Total Messages</h3>
+                    <p id="total-messages">0</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Unread Messages</h3>
+                    <p id="unread-messages">0</p>
+                </div>
+            </div>
+            <hr>
+            <div id="messages" class="dashboard-section">
+                <h2>Messages</h2>
+                <div class="messages-container">
+                    <table id="messages-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Message</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            loadMessages();
+            updateMessageStats();
+        });
+    </script>
+    <script src="../js/admin.js"></script>
+</body>
+</html>

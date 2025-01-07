@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="../css/admin.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+    <div class="dashboard-container">
+        <nav class="dashboard-nav">
+            <h2>Admin Dashboard</h2>
+            <ul>
+                <li><a href="#projects" class="active">Projects</a></li>
+                <li><a href="messages.html">Messages</a></li>
+                <li><a href="settings.html">Settings</a></li>
+                <li><button id="logout">Logout</button></li>
+            </ul>
+        </nav>
+        
+        <main class="dashboard-content">
+            <div class="stats-cards">
+                <div class="stat-card">
+                    <h3>Total Projects</h3>
+                    <p id="total-projects">0</p>
+                </div>
+                <div class="stat-card">
+                    <h3>New Messages</h3>
+                    <p id="new-messages">0</p>
+                </div>
+            </div>
+            <hr>
+            <div id="projects" class="dashboard-section">
+                <h2>Add New Project</h2>
+                <form id="projectForm" class="project-form">
+                    <div class="form-group">
+                        <input type="text" name="title" placeholder="Project Title" required>
+                    </div>
+                    <div class="form-group">
+                        <textarea name="description" placeholder="Project Description" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <input type="url" name="image" placeholder="Image URL" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="text" name="technologies" placeholder="Technologies (e.g., HTML, CSS, JS)" required>
+                    </div>
+                    <button type="submit" class="submit-btn">Add Project</button>
+                </form>
+            
+                <table id="projects-table">
+                    <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Description</th>
+                            <th>Technologies</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+    <script src="../js/admin.js"></script>
+</body>
+</html>
