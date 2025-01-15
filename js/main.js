@@ -27,8 +27,59 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
+// Set active nav link based on current page
+function setActiveNavLink() {
+    const currentPath = window.location.pathname;
+    const currentHash = window.location.hash;
+    const navLinks = document.querySelectorAll('.nav-link');
 
+    navLinks.forEach(link => link.classList.remove('active'));
 
+    let currentPage = '';
+    if (currentPath.includes('about.html')) {
+        currentPage = 'about';
+    } else if (currentPath.includes('contact.html')) {
+        currentPage = 'contact';
+    } else if (currentPath === '/' || currentPath.includes('index.html')) {
+        currentPage = 'home';
+    }
+
+    navLinks.forEach(link => {
+        const dataPage = link.getAttribute('data-page');
+        
+        if (currentPage === dataPage) {
+            link.classList.add('active');
+        }
+        else if (currentPage === 'home' && currentHash && link.getAttribute('href').includes(currentHash)) {
+            link.classList.add('active');
+        }
+    });
+}
+
+document.addEventListener('DOMContentLoaded', setActiveNavLink);
+window.addEventListener('hashchange', setActiveNavLink);
+
+window.addEventListener('scroll', () => {
+    if (window.location.pathname === '/' || window.location.pathname.includes('index.html')) {
+        const sections = document.querySelectorAll('section[id]');
+        const scrollPosition = window.pageYOffset + 100;
+
+        sections.forEach(section => {
+            const sectionTop = section.offsetTop;
+            const sectionHeight = section.offsetHeight;
+            const sectionId = section.getAttribute('id');
+            
+            if (scrollPosition >= sectionTop && scrollPosition < sectionTop + sectionHeight) {
+                document.querySelectorAll('.nav-link').forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href').includes(`#${sectionId}`)) {
+                        link.classList.add('active');
+                    }
+                });
+            }
+        });
+    }
+});
 
 //Slider
 document.addEventListener('DOMContentLoaded', function() {
@@ -122,12 +173,38 @@ function handleContactSubmit(event) {
     event.preventDefault();
     const form = event.target;
 
+    const name = form.name.value.trim();
+    const email = form.email.value.trim();
+    const subject = form.subject ? form.subject.value.trim() : '';
+    const messageText = form.message.value.trim();
+
+    if (!name || !email || !subject || !messageText) {
+        alert('Please fill in all required fields');
+        return false;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        alert('Please enter a valid email address');
+        return false;
+    }
+
+    if (name.length < 4) {
+        alert('Name must be at least 4 characters long');
+        return false;
+    }
+
+    if (messageText.length < 10) {
+        alert('Message must be at least 10 characters long');
+        return false;
+    }
+
     const message = {
         id: Date.now(),
-        name: form.name.value.trim(),
-        email: form.email.value.trim(),
-        subject: form.subject ? form.subject.value.trim() : 'Contact Form Submission',
-        message: form.message.value.trim(),
+        name: name,
+        email: email,
+        subject: subject || 'Contact Form Submission',
+        message: messageText,
         date: new Date().toISOString(),
         read: false
     };
@@ -205,3 +282,17 @@ const observer = new IntersectionObserver((entries) => {
 if (statisticsSection) {
     observer.observe(statisticsSection);
 }
+
+(() => {
+    'use strict'
+    const forms = document.querySelectorAll('.needs-validation')
+    Array.from(forms).forEach(form => {
+        form.addEventListener('submit', event => {
+            if (!form.checkValidity()) {
+                event.preventDefault()
+                event.stopPropagation()
+            }
+            form.classList.add('was-validated')
+        }, false)
+    })
+})()

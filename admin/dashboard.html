@@ -5,8 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard</title>
     <link rel="stylesheet" href="../css/admin.css">
+    <link rel="icon" type="image/x-icon" href="/images/logo.png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
 </head>
 <body>
     <div class="dashboard-container">
@@ -16,7 +19,10 @@
                 <li><a href="#projects" class="active">Projects</a></li>
                 <li><a href="messages.html">Messages</a></li>
                 <li><a href="settings.html">Settings</a></li>
-                <li><button id="logout">Logout</button></li>
+                <li><button id="logout" class="logout-btn">
+                    <i class="fas fa-sign-out-alt" aria-hidden="true"></i>
+                    <span>Logout</span>
+                </button></li>
             </ul>
         </nav>
         
@@ -33,23 +39,38 @@
             </div>
             <hr>
             <div id="projects" class="dashboard-section">
-                <h2>Add New Project</h2>
-                <form id="projectForm" class="project-form">
-                    <div class="form-group">
-                        <input type="text" name="title" placeholder="Project Title" required>
+                <div class="projects-header">
+                    <h2>Projects</h2>
+                    <button class="add-project-btn" id="openProjectModal">
+                        <i class="fas fa-plus-circle"></i>
+                        Add New Project
+                    </button>
+                </div>
+
+                <!-- Modal -->
+                <div class="modal" id="projectModal">
+                    <div class="modal-content">
+                        <button class="modal-close" id="closeProjectModal" aria-label="Close modal"></button>
+                        <h2>Add New Project</h2>
+                        <form id="projectForm" class="project-form">
+                            <div class="form-group">
+                                <input type="text" name="title" placeholder="Project Title" required>
+                            </div>
+                            <div class="form-group">
+                                <textarea name="description" placeholder="Project Description" required></textarea>
+                            </div>
+                            <div class="form-group label-file">
+                                <label for="projectImage">Project Image</label>
+                                <input type="file" id="projectImage" name="image" accept="image/*" required>
+                            </div>
+                            <div class="form-group">
+                                <input type="text" name="technologies" placeholder="Technologies (e.g., BIM, 3D Printing, VR, Robotics and Automation)" required>
+                            </div>
+                            <button type="submit" class="submit-btn">Add Project</button>
+                        </form>
                     </div>
-                    <div class="form-group">
-                        <textarea name="description" placeholder="Project Description" required></textarea>
-                    </div>
-                    <div class="form-group">
-                        <input type="url" name="image" placeholder="Image URL" required>
-                    </div>
-                    <div class="form-group">
-                        <input type="text" name="technologies" placeholder="Technologies (e.g., HTML, CSS, JS)" required>
-                    </div>
-                    <button type="submit" class="submit-btn">Add Project</button>
-                </form>
-            
+                </div>
+
                 <table id="projects-table">
                     <thead>
                         <tr>

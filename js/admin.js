@@ -59,6 +59,60 @@ function setupLogout() {
     }
 }
 
+
+// Modal Functionality
+const modal = document.getElementById('projectModal');
+const openModalBtn = document.getElementById('openProjectModal');
+const closeModalBtn = document.getElementById('closeProjectModal');
+
+const openModal = () => {
+    const modal = document.getElementById('projectModal');
+    const modalContent = modal.querySelector('.modal-content');
+    
+    modal.classList.add('active');
+    
+    setTimeout(() => {
+        modalContent.style.opacity = '1';
+        modalContent.style.transform = 'perspective(1000px) rotateX(0) scale(1) translateY(0)';
+    }, 100);
+};
+
+const closeModal = () => {
+    const modal = document.getElementById('projectModal');
+    const modalContent = modal.querySelector('.modal-content');
+    
+    modalContent.style.opacity = '0';
+    modalContent.style.transform = 'perspective(1000px) scale(0.9) translateY(30px)';
+    
+    setTimeout(() => {
+        modal.classList.remove('active');
+        modalContent.removeAttribute('style');
+    }, 300);
+};
+
+openModalBtn.addEventListener('click', openModal);
+closeModalBtn.addEventListener('click', closeModal);
+modal.addEventListener('click', (e) => {
+    if (e.target === modal) {
+        closeModal();
+    }
+});
+
+document.getElementById('projectImage').addEventListener('change', function(e) {
+    const preview = document.getElementById('imagePreview');
+    const file = e.target.files[0];
+    
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            preview.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
+        }
+        reader.readAsDataURL(file);
+    } else {
+        preview.innerHTML = '';
+    }
+});
+
 // Projects Management
 function setupProjectsManagement() {
     loadProjects();
@@ -107,13 +161,19 @@ function editProject(projectId) {
         const form = document.getElementById('projectForm');
         form.title.value = project.title;
         form.description.value = project.description;
-        form.image.value = project.image || '';
         form.technologies.value = project.technologies || '';
+        
+        const imagePreview = document.getElementById('imagePreview');
+        if (imagePreview) {
+            imagePreview.innerHTML = project.image ? 
+                `<img src="${project.image}" alt="Current project image">` : '';
+        }
         
         isEditing = true;
         editingProjectId = projectId;
         form.querySelector('button[type="submit"]').textContent = 'Update Project';
-        form.scrollIntoView({ behavior: 'smooth' });
+        
+        openModal();
     }
 }
 
@@ -130,36 +190,52 @@ function setupProjectForm() {
 function handleProjectSubmit(e) {
     e.preventDefault();
     const form = e.target;
+    const imageFile = form.image.files[0];
     const projects = JSON.parse(localStorage.getItem('projects') || '[]');
 
-    const projectData = {
-        title: form.title.value.trim(),
-        description: form.description.value.trim(),
-        image: form.image.value.trim(),
-        technologies: form.technologies.value.trim(),
-        date: new Date().toISOString()
-    };
+    const saveProject = (imageData) => {
+        const projectData = {
+            title: form.title.value.trim(),
+            description: form.description.value.trim(),
+            image: imageData,
+            technologies: form.technologies.value.trim(),
+            date: new Date().toISOString()
+        };
 
-    if (isEditing && editingProjectId) {
-        const index = projects.findIndex(p => p.id === editingProjectId);
-        if (index !== -1) {
-            projects[index] = {
-                ...projects[index],
-                ...projectData
-            };
+        if (isEditing && editingProjectId) {
+            const index = projects.findIndex(p => p.id === editingProjectId);
+            if (index !== -1) {
+                projectData.id = editingProjectId;
+                projects[index] = { ...projects[index], ...projectData };
+            }
+        } else {
+            projectData.id = Date.now();
+            projects.push(projectData);
         }
+
+        localStorage.setItem('projects', JSON.stringify(projects));
+        form.reset();
+        if (document.getElementById('imagePreview')) {
+            document.getElementById('imagePreview').innerHTML = '';
+        }
+        closeModal();
+        loadProjects();
+        updateStats();
+        
         isEditing = false;
         editingProjectId = null;
-    } else {
-        projectData.id = Date.now();
-        projects.push(projectData);
-    }
+    };
 
-    localStorage.setItem('projects', JSON.stringify(projects));
-    form.reset();
-    form.querySelector('button[type="submit"]').textContent = 'Add Project';
-    loadProjects();
-    updateStats();
+    if (imageFile) {
+        const reader = new FileReader();
+        reader.onload = (e) => saveProject(e.target.result);
+        reader.readAsDataURL(imageFile);
+    } else if (isEditing) {
+        const existingProject = projects.find(p => p.id === editingProjectId);
+        saveProject(existingProject.image);
+    } else {
+        alert('Please select an image');
+    }
 }
 
 function deleteProject(projectId) {
@@ -221,7 +297,7 @@ function loadMessages() {
     
     if (messages.length === 0) {
         const row = document.createElement('tr');
-        row.innerHTML = '<td colspan="5" class="no-messages">No messages yet</td>';
+        row.innerHTML = '<td colspan="6" class="no-messages">No messages yet</td>';
         tableBody.appendChild(row);
         return;
     }
@@ -232,6 +308,7 @@ function loadMessages() {
         row.innerHTML = `
             <td>${msg.name}</td>
             <td>${msg.email}</td>
+            <td>${msg.subject}</td>
             <td>${msg.message}</td>
             <td>${new Date(msg.date).toLocaleString()}</td>
             <td>
@@ -324,4 +401,61 @@ function setupSettingsForm() {
 
 document.addEventListener('DOMContentLoaded', () => {
     setupSettingsForm();
+});
+
+
+
+// jQuery Enhancements
+$(document).ready(function() {
+    $('.stat-card').each(function(index) {
+        $(this).delay(200 * index).fadeIn(500);
+    });
+
+    $('#projects-table tbody tr').hover(
+        function() { $(this).addClass('hover').effect('highlight', {}, 1000); },
+        function() { $(this).removeClass('hover'); }
+    );
+
+    $('#projectForm').on('submit', function(e) {
+        e.preventDefault();
+        const form = $(this);
+        
+        $('.submit-btn', form).addClass('loading').prop('disabled', true);
+        
+        setTimeout(() => {
+            handleProjectSubmit(e);
+            
+            $('.modal-content').effect('bounce', { times: 3 }, 300);
+            
+            setTimeout(() => {
+                closeModal();
+                
+                $('<div>')
+                    .addClass('notification')
+                    .text('Project saved successfully!')
+                    .appendTo('body')
+                    .fadeIn(400)
+                    .delay(2000)
+                    .fadeOut(400, function() { $(this).remove(); });
+            }, 500);
+        }, 800);
+    });
+
+    const modalContent = $('.modal-content');
+    
+    $('#openProjectModal').click(function() {
+        modalContent.css('transform', 'scale(0.7)');
+        $('.modal').fadeIn(300, function() {
+            modalContent.transition({
+                scale: 1,
+                opacity: 1
+            }, 500, 'easeOutBack');
+        });
+    });
+
+    function smoothScrollToForm() {
+        $('html, body').animate({
+            scrollTop: $('#projectForm').offset().top - 100
+        }, 800, 'easeInOutQuad');
+    }
 });
