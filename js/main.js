@@ -32,28 +32,26 @@ function setActiveNavLink() {
     const currentPath = window.location.pathname;
     const currentHash = window.location.hash;
     const navLinks = document.querySelectorAll('.nav-link');
+    const homeLink = document.querySelector('.nav-link[data-page="home"]');
 
     navLinks.forEach(link => link.classList.remove('active'));
 
-    let currentPage = '';
-    if (currentPath.includes('about.html')) {
-        currentPage = 'about';
-    } else if (currentPath.includes('contact.html')) {
-        currentPage = 'contact';
-    } else if (currentPath === '/' || currentPath.includes('index.html')) {
-        currentPage = 'home';
-    }
+    const isHomePage = currentPath === '/' || currentPath.includes('index.html');
 
-    navLinks.forEach(link => {
-        const dataPage = link.getAttribute('data-page');
+    if (isHomePage) {
+        homeLink.classList.add('active');
         
-        if (currentPage === dataPage) {
-            link.classList.add('active');
+        if (currentHash) {
+            const sectionLink = document.querySelector(`.nav-link[href$="${currentHash}"]`);
+            if (sectionLink && sectionLink !== homeLink) {
+                sectionLink.classList.add('active');
+            }
         }
-        else if (currentPage === 'home' && currentHash && link.getAttribute('href').includes(currentHash)) {
-            link.classList.add('active');
-        }
-    });
+    } else if (currentPath.includes('about.html')) {
+        document.querySelector('.nav-link[data-page="about"]').classList.add('active');
+    } else if (currentPath.includes('contact.html')) {
+        document.querySelector('.nav-link[data-page="contact"]').classList.add('active');
+    }
 }
 
 document.addEventListener('DOMContentLoaded', setActiveNavLink);
@@ -61,8 +59,11 @@ window.addEventListener('hashchange', setActiveNavLink);
 
 window.addEventListener('scroll', () => {
     if (window.location.pathname === '/' || window.location.pathname.includes('index.html')) {
+        const homeLink = document.querySelector('.nav-link[data-page="home"]');
         const sections = document.querySelectorAll('section[id]');
         const scrollPosition = window.pageYOffset + 100;
+
+        homeLink.classList.add('active');
 
         sections.forEach(section => {
             const sectionTop = section.offsetTop;
@@ -70,12 +71,15 @@ window.addEventListener('scroll', () => {
             const sectionId = section.getAttribute('id');
             
             if (scrollPosition >= sectionTop && scrollPosition < sectionTop + sectionHeight) {
-                document.querySelectorAll('.nav-link').forEach(link => {
-                    link.classList.remove('active');
-                    if (link.getAttribute('href').includes(`#${sectionId}`)) {
-                        link.classList.add('active');
-                    }
-                });
+                const sectionLink = document.querySelector(`.nav-link[href*="#${sectionId}"]`);
+                if (sectionLink && sectionLink !== homeLink) {
+                    sectionLink.classList.add('active');
+                }
+            } else {
+                const sectionLink = document.querySelector(`.nav-link[href*="#${sectionId}"]`);
+                if (sectionLink && sectionLink !== homeLink) {
+                    sectionLink.classList.remove('active');
+                }
             }
         });
     }
