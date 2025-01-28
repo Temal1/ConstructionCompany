@@ -1,10 +1,26 @@
+let prevScrollPos = window.pageYOffset;
+
 window.addEventListener('scroll', () => {
     const navbar = document.querySelector('.navbar');
-    if (window.scrollY > 50) {
+    const currentScrollPos = window.pageYOffset;
+    
+    if (currentScrollPos > 100) { 
+        if (prevScrollPos > currentScrollPos) {
+            navbar.style.transform = "translateY(0)";
+        } else {
+            navbar.style.transform = "translateY(-100%)";
+        }
+    } else {
+        navbar.style.transform = "translateY(0)";
+    }
+    
+    if (currentScrollPos > 50) {
         navbar.classList.add('scrolled');
     } else {
         navbar.classList.remove('scrolled');
     }
+    
+    prevScrollPos = currentScrollPos;
 });
 
 //Nav
@@ -87,12 +103,40 @@ window.addEventListener('scroll', () => {
 
 //Slider
 document.addEventListener('DOMContentLoaded', function() {
+    const slider = document.querySelector('.slider');
     const slides = document.querySelectorAll('.slide');
     const dots = document.querySelectorAll('.dot');
     const nextBtn = document.querySelector('.next');
     const prevBtn = document.querySelector('.prev');
     let currentSlide = 0;
     let slideInterval;
+    let touchStartX = 0;
+    let touchEndX = 0;
+
+    // Touch Events
+    slider.addEventListener('touchstart', (e) => {
+        touchStartX = e.changedTouches[0].screenX;
+    }, { passive: true });
+
+    slider.addEventListener('touchend', (e) => {
+        touchEndX = e.changedTouches[0].screenX;
+        handleSwipe();
+    }, { passive: true });
+
+    function handleSwipe() {
+        const swipeThreshold = 50; // minimum distance for swipe
+        const diff = touchStartX - touchEndX;
+
+        if (Math.abs(diff) > swipeThreshold) {
+            if (diff > 0) {
+                // Swiped left - show next slide
+                showSlide(currentSlide + 1);
+            } else {
+                // Swiped right - show previous slide
+                showSlide(currentSlide - 1);
+            }
+        }
+    }
 
     function showSlide(index) {
         if (index >= slides.length) index = 0;
@@ -126,36 +170,48 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 
-// Load projects
-function loadProjects() {
-    const projectsGrid = document.querySelector('.projects-grid');
-    if (!projectsGrid) return;
+// Projects Data
+const projectsData = [
+    {
+        title: "Modern Office Complex",
+        description: "A state-of-the-art office building featuring sustainable design and smart technology integration.",
+        image: "/images/moderndesign.jpg",
+        technologies: "Sustainable Materials, Smart Systems, Green Building"
+    },
+    {
+        title: "Luxury Residential Tower",
+        description: "High-end residential complex with premium amenities and contemporary architecture.",
+        image: "/images/qualityconstruction.jpg",
+        technologies: "Premium Materials, Modern Design, Smart Home"
+    },
+    {
+        title: "Industrial Facility",
+        description: "Large-scale industrial facility with advanced manufacturing capabilities and efficient logistics.",
+        image: "/images/expertteam.jpg",
+        technologies: "Industrial Design, Safety Systems, Automation"
+    },
+    {
+        title: "Shopping Center",
+        description: "Modern shopping complex with innovative design and sustainable features.",
+        image: "/images/safetyfirst.jpg",
+        technologies: "Retail Design, Energy Efficiency, Modern Architecture"
+    }
+];
 
-    projects.forEach(project => {
-        const projectCard = document.createElement('div');
-        projectCard.className = 'project-card';
-        projectCard.innerHTML = `
-            <img src="images/${project.image}" alt="${project.name}">
-            <h3>${project.name}</h3>
-            <p>${project.description}</p>
-        `;
-        projectsGrid.appendChild(projectCard);
-    });
-}
 function displayProjects() {
-    const projects = JSON.parse(localStorage.getItem('projects') || '[]');
     const projectsGrid = document.getElementById('projects-grid');
+    if (!projectsGrid) return;
     
     projectsGrid.innerHTML = '';
     
-    projects.forEach(project => {
+    projectsData.forEach(project => {
         const technologies = project.technologies.split(',').map(tech => 
             `<span>${tech.trim()}</span>`
         ).join('');
 
         const projectCard = `
             <div class="project-card">
-                <img src="${project.image || 'default-project-image.jpg'}" alt="${project.title}">
+                <img src="${project.image}" alt="${project.title}">
                 <div class="project-info">
                     <h3>${project.title}</h3>
                     <p>${project.description}</p>
@@ -168,7 +224,9 @@ function displayProjects() {
         projectsGrid.innerHTML += projectCard;
     });
 }
+
 document.addEventListener('DOMContentLoaded', displayProjects);
+
 
 
 
